@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barra de Búsqueda</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="welcome-text" id="welcomeText">Bienvenido </div>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+        <div class="search-bar">
+            <input type="text" placeholder="Buscar..." id="search">
+            <button type="submit" onclick="search()">Buscar</button>
+        </div>
+        <div id="table_div"></div>
+        <table id="grid"></table>
+
+        
+    </div>
+    <script src="index.js"></script>
+</body>
+</html>

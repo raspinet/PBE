@@ -1,0 +1,165 @@
+body {
+    background-color: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+#grid th {
+    size: 200px;
+}
+
+.signin {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    width: 400px; /* Aumentar el ancho */
+    height: auto; /* Permitir que la altura se ajuste automáticamente */
+}
+
+
+
+#grid {
+    border-collapse: collapse;
+    width: 100%; /* Ajusta este valor según tus necesidades */
+}
+
+#grid th, #grid td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+#grid th {
+    background-color: #4CAF50;
+    color: white;
+    text-align: left;
+}
+
+.content {
+    text-align: center;
+}
+
+.form {
+    margin-top: 20px;
+}
+
+.inputBox {
+    margin-bottom: 15px;
+}
+
+.inputBox input {
+    width: calc(100% - 20px); /* Añadido: Restar el padding del ancho */
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.links {
+    margin-top: 10px;
+}
+
+.links a {
+    color: #007bff;
+    text-decoration: none;
+    margin-right: 10px;
+}
+
+.links a:hover {
+    text-decoration: underline;
+}
+
+.search-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.search-bar input {
+    padding: 10px;
+    border-radius: 5px 0 0 5px;
+    border: 1px solid #ccc;
+    width: 200px;
+}
+
+.search-bar button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 0 5px 5px 0;
+    cursor: pointer;
+}
+
+.search-bar button:hover {
+    background-color: #0056b3;
+}
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    border-radius: 30px;
+    border: 5px solid #7ac6e49c;
+    background-color:#ccc
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.welcome-text {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.logout-btn {
+    padding: 10px 20px;
+    border: none;
+    background-color: #dc3545;
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.logout-btn:hover {
+    background-color: #c82333;
+}
+
+.search-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.search-bar input {
+    padding: 10px;
+    border-radius: 5px 0 0 5px;
+    border: 1px solid #ccc;
+    width: 200px;
+}
+
+.search-bar button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 0 5px 5px 0;
+    cursor: pointer;
+}
+
+.search-bar button:hover {
+    background-color: #0056b3;
+}
+
+#grid {
+    margin-top: 20px;
+    padding: 10px;
+    border-radius: 5px 0 0 5px;
+    border: 1px solid #000;
+}
+
