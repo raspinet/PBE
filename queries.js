@@ -10,7 +10,7 @@ const pool = mysql.createPool({
     port: 3306,
 });
 
-// Convierte un objeto a un arreglo de parámetros
+// Convierte un objeto a un array de parámetros
 function objectToArray(obj) {
     return Object.keys(obj).map(key => ({ parameter: key, value: obj[key] }));
 }
