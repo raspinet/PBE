@@ -1,103 +1,112 @@
-const queries = require('./queries');
-const url = require('url');
-const http = require('http');
+import { writeResponse, searchQuery, logoutFunction } from './queries.js';
+import { URL } from 'url';
+import http from 'http';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-// Tabla de usuarios (temporal para autenticación)
-const users = [
-    { username: 'Jiajun', password: '1111' },
-    { username: 'Huankang', password: '2222' },
-    { username: 'Sebastian', password: '3333' },
-    { username: 'Pau', password: '4444' }
-];
+// Configurar __dirname para ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+var studentId;
 
 const server = http.createServer((request, response) => {
     const reqMethod = request.method;
-    const parsedURL = url.parse(request.url, true);
-    const table = parsedURL.pathname.slice(1); // Ruta solicitada
-    const queryParams = parsedURL.query; // Parámetros de consulta
+    const reqURL = request.url;
+    const q = new URL(reqURL, `http://${request.headers.host}`);
+    const table = q.pathname.slice(1); // Quitar la barra inicial
 
     response.setHeader('Access-Control-Allow-Origin', '*');
-    response.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    response.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-    console.log(`Método: ${reqMethod}, Ruta: ${table}`);
+    if (reqMethod === "GET") {
+        if (isStaticFile(reqURL)) {
+            // Manejar archivos estáticos (.html, .css, .js, etc.)
+            serveStaticFile(reqURL, response);
+            return;
+        }
 
-    if (reqMethod === 'GET') {
-        handleGetRequest(table, queryParams, request, response);
+        if (table === '') {
+            // Sirve el archivo index.html para la raíz "/"
+            serveFile('index.html', response);
+        } else if (table === 'menu') {
+            // Sirve el archivo menu.html para "/menu"
+            serveFile('menu.html', response);
+        } else if (table === 'students') {
+            studentId = q.searchParams.get('student_id');
+            if (!studentId) {
+                response.writeHead(400, { 'Content-Type': 'application/json' });
+                response.end(JSON.stringify({ error: 'Falta el parámetro student_id' }));
+                return;
+            }
+            const sql = `SELECT name FROM students WHERE student_id='${studentId}';`;
+            writeResponse(sql, response, table);
+        } else if (table === 'logout') {
+            logoutFunction(response);
+        } else {
+          var sql = `SELECT * FROM ${table} WHERE student_id = '${studentId}'` + searchQuery(request, response);
+          console.log(sql);
+          writeResponse(sql, response, table);
+        }
     } else {
-        response.writeHead(405, { "Content-Type": "application/json" });
-        response.write(JSON.stringify({ error: `Método ${reqMethod} no soportado.` }));
-        response.end();
+        response.writeHead(405, { 'Content-Type': 'application/json' });
+        response.end(JSON.stringify({ error: 'Método no permitido' }));
     }
 });
 
-function handleGetRequest(table, queryParams, request, response) {
-    console.log('Ruta detectada:', table);
-    console.log('Parámetros recibidos:', queryParams);
+// Función para verificar si es un archivo estático
+function isStaticFile(url) {
+    const staticFileExtensions = ['.html', '.css', '.js', '.png', '.jpg', '.jpeg', '.gif', '.ico'];
+    return staticFileExtensions.some((ext) => url.endsWith(ext));
+}
 
-    // Extraer parámetros
-    let student_id = queryParams.student_id;
-    const username = queryParams.username;
-    const password = queryParams.password;
-
-    // Validar student_id o username/password
-    if (!student_id) {
-        if (!username || !password) {
-            console.log('Faltan credenciales');
-            response.writeHead(400, { "Content-Type": "application/json" });
-            response.write(JSON.stringify({ error: 'Usuario y contraseña o student_id son obligatorios.' }));
-            response.end();
-            return;
+// Función para servir archivos estáticos
+function serveStaticFile(reqURL, response) {
+    const filePath = path.join(__dirname, reqURL);
+    fs.readFile(filePath, (err, data) => {
+        if (err) {
+            response.writeHead(404, { 'Content-Type': 'text/plain' });
+            response.end('Archivo no encontrado');
+        } else {
+            const contentType = getContentType(filePath);
+            response.writeHead(200, { 'Content-Type': contentType });
+            response.end(data);
         }
+    });
+}
 
-        // Verificar username y password en la lista de usuarios
-        const user = users.find(u => u.username === username && u.password === password);
-        if (!user) {
-            console.log('Credenciales inválidas');
-            response.writeHead(401, { "Content-Type": "application/json" });
-            response.write(JSON.stringify({ error: 'Credenciales inválidas.' }));
-            response.end();
-            return;
-        }
-
-        // Usar la contraseña como student_id
-        student_id = password;
-    }
-
-    // Manejo de rutas
-    if (table === 'students') {
-        const sql = `SELECT name FROM students WHERE student_id = ?`;
-        console.log('Consulta generada:', sql, 'Parámetros:', [student_id]);
-        queries.writeResponse(sql, [student_id], response, 'students');
-
-    } else if (['tasks', 'marks', 'timetables'].includes(table)) {
-        const queryData = queries.searchQuery(request, response);
-
-        if (!queryData || typeof queryData.sql !== 'string' || !Array.isArray(queryData.params)) {
-            response.writeHead(500, { "Content-Type": "application/json" });
-            response.write(JSON.stringify({ error: 'Error interno al procesar la consulta.' }));
-            response.end();
-            return;
-        }
-
-        const sql = `SELECT * FROM ${table} WHERE student_id = ? ${queryData.sql}`;
-        const params = [student_id, ...queryData.params];
-
-        console.log('Consulta generada:', sql);
-        console.log('Parámetros:', params);
-
-        queries.writeResponse(sql, params, response, table);
-
-    } else {
-        response.writeHead(400, { "Content-Type": "application/json" });
-        response.write(JSON.stringify({ error: 'Ruta no válida.' }));
-        response.end();
+// Función para obtener el tipo de contenido
+function getContentType(filePath) {
+    const ext = path.extname(filePath);
+    switch (ext) {
+        case '.html': return 'text/html';
+        case '.css': return 'text/css';
+        case '.js': return 'application/javascript';
+        case '.png': return 'image/png';
+        case '.jpg': return 'image/jpeg';
+        case '.jpeg': return 'image/jpeg';
+        case '.gif': return 'image/gif';
+        case '.ico': return 'image/x-icon';
+        default: return 'text/plain';
     }
 }
 
+// Función para servir archivos HTML (index.html, menu.html, etc.)
+function serveFile(filename, response) {
+    const filePath = path.join(__dirname, filename);
+    fs.readFile(filePath, (err, data) => {
+        if (err) {
+            response.writeHead(500, { 'Content-Type': 'text/plain' });
+            response.end('Error interno del servidor');
+        } else {
+            response.writeHead(200, { 'Content-Type': 'text/html' });
+            response.end(data);
+        }
+    });
+}
 
-const port = 9000; // Puerto
-const host = '0.0.0.0'; // Escuchar en todas las interfaces
+const port = 9000;
+const host = '0.0.0.0';
 
 server.listen(port, host, () => {
     console.log(`Servidor escuchando en el puerto ${port}`);
