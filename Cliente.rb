@@ -107,14 +107,14 @@ class MainWindow < Gtk::Window
     iniciar_timeout # Empezar timeout
     ip = '172.20.10.2'
     @frame.destroy # Eliminar los widgets existentes de la ventana anterior
-    @lcd_controller.printCenter("Welcome #{@nombre}") # Mostrar el mensaje en la LCD
+    @lcd_controller.printCenter("Welcome \n #{@nombre}") # Mostrar el mensaje en la LCD
 
     # Crear estructura de la ventana
     @table = Gtk::Table.new(2, 2, true)
     @table.set_column_spacing(300)
     @table.set_row_spacings(10)
 
-    @nombre = Gtk::Label.new("Welcome #{@nombre}")
+    @nombre = Gtk::Label.new("Welcome \n #{@nombre}")
     @query_entry = Gtk::Entry.new
     @query_entry.set_placeholder_text("Ingrese query (timetables, tasks, marks)")
 
