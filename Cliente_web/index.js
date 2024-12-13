@@ -1,5 +1,5 @@
 // URL del servidor
-const SERVER_URL = 'http://localhost:9000';
+const SERVER_URL = 'http://172.20.10.2:9000';
 
 // Función para manejar el inicio de sesión
 function login() {
@@ -13,7 +13,7 @@ function login() {
         return;
     }
 
-    fetch(`http://127.0.0.1:9000/students?student_id=${encodeURIComponent(password)}`)
+    fetch(`${SERVER_URL}/students?student_id=${encodeURIComponent(password)}`)
         .then((response) => {
             if (!response.ok) {
                 throw new Error("Error en la solicitud");
@@ -57,7 +57,7 @@ function search() {
         return;
     }
 
-    fetch(`http://localhost:9000/${query}?student_id=${student_id}`)
+    fetch(`${SERVER_URL}/${query}?student_id=${student_id}`)
         .then((response) => {
             console.log("Estado de la respuesta:", response.status);
             if (!response.ok) {
