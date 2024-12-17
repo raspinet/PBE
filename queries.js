@@ -86,47 +86,47 @@ function searchQuery(request, response) {
 
     // Construcción dinámica de SQL
     for (let [key, value] of params.entries()) {
-        if (key === 'limit') continue;
-    
-        let replaced = false;
-    
-        // Reemplazo de claves y valores
-        for (let [keyword, replacement] of Object.entries(keywords2)) {
-            if (key.includes(keyword)) {
-                key = key.replace(keyword, replacement);
-                replaced = true;
-            }
-            if (value === keyword) {
-                value = replacement;
-                replaced = true;
-            }
+    if (key === 'limit') continue;
+
+    let replaced = false;
+
+    // Reemplazo de claves y valores
+    for (let [keyword, replacement] of Object.entries(keywords2)) {
+        if (key.includes(keyword)) {
+            key = key.replace(keyword, replacement);
+            replaced = true;
         }
-    
-        // Construcción del SQL según el tipo de clave y valor
-        if (key === 'hour') {
-            // Manejo específico para horas
-            sql += ` AND ${key} >= '${value}'`;
-        } else if (key === 'day') {
-            // Manejo específico para día (guarda el valor numérico)
-            diaDef = parseInt(value, 10);
-            sql += ` AND ${key} = '${value}'`;
-        } else {
-            // Verifica si el valor es una función SQL como NOW()
-            const formattedValue = value === 'NOW()' ? value : `'${value}'`;
-            sql += ` AND ${key} ${replaced ? '' : '='} ${formattedValue}`;
+        if (value === keyword) {
+            value = replacement;
+            replaced = true;
         }
     }
-    
 
+    // Construcción del SQL según el tipo de clave y valor
+    if (key === 'hour') {
+        // Manejo específico para horas
+        sql += ` AND ${key} >= '${value}'`;
+    } else if (key === 'day') {
+        // Manejo específico para día (guarda el valor numérico)
+        diaDef = parseInt(value, 10);
+        sql += ` AND ${key} = '${value}'`;
+    } else {
+        // Verifica si el valor es una función SQL como NOW()
+        const formattedValue = value === 'NOW()' ? value : `${value}`;
+        sql += ` AND ${key} ${replaced ? '' : '='} ${formattedValue}`;
+        
+    }
+}
     // Ordenación específica para tasks
     if (url.pathname === '/tasks') {
         sql += ` ORDER BY ABS(DATEDIFF(CURRENT_DATE, date)) ASC`;
     }
     // Ordenación específica para timetables
     else if (url.pathname === '/timetables') {
+        if(!params.has('day')) diaDef = date.getDay();
         sql += ` ORDER BY FIELD(day`;
         for (let i = 0; i < 6; i++) {
-            sql += `, '${(diaDef + i) % 7}'`;
+            sql += `, '${(diaDef + i) % 6}'`;
         }
         sql += ')';
     }
